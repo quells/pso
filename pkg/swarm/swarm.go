@@ -367,13 +367,13 @@ func scale(v []float64, s float64) []float64 {
 	return result
 }
 
-func (opt *Optimizer) StepUntil(progressRate float64) {
+func (opt *Optimizer) StepUntil(progressRate float64) (steps int) {
 	if opt == nil {
 		return
 	}
 
 	opt.Step()
-	steps := 1
+	steps = 1
 
 	minProgressRate := math.Abs(progressRate)
 	last := opt.globalBestFitness
@@ -382,7 +382,9 @@ func (opt *Optimizer) StepUntil(progressRate float64) {
 	for {
 		opt.Step()
 		steps++
-		// log.Println(steps, opt.globalBestFitness, opt.averageFitness)
+		if opt.options.Verbose {
+			log.Println(steps, opt.globalBestFitness, opt.averageFitness)
+		}
 
 		if last-opt.globalBestFitness < minProgressRate {
 			stepsSinceImprovement++
@@ -393,12 +395,17 @@ func (opt *Optimizer) StepUntil(progressRate float64) {
 				break
 			}
 		} else {
-			log.Println(steps, opt.globalBestFitness)
+			if opt.options.Verbose {
+				log.Println(steps, opt.globalBestFitness)
+			}
 			stepsSinceImprovement = 0
 		}
 
 		last = opt.globalBestFitness
 	}
 
-	log.Println(steps, opt.globalBestFitness)
+	if opt.options.Verbose {
+		log.Println(steps, opt.globalBestFitness)
+	}
+	return steps
 }
